@@ -485,6 +485,13 @@ class ModelAndTokenizer:
 
 
 def layername(model, num, kind=None):
+    print(f"model name: {type(model).__name__}")
+    if type(model).__name__ == "BloomForCausalLM":
+        if kind == "embed":
+            return "transformer.word_embeddings"
+        if kind == "attn":
+            kind = "self_attention"
+        return f'transformer.h.{num}{"" if kind is None else "." + kind}'
     if hasattr(model, "transformer"):
         if kind == "embed":
             return "transformer.wte"
@@ -648,11 +655,11 @@ def collect_embedding_std(mt, subjects):
     alldata = []
     for s in subjects:
         inp = make_inputs(mt.tokenizer, [s])
-        with nethook.Trace(mt.model, layername(mt.model, 0, "embed")) as t:
-            mt.model(**inp)
-            alldata.append(t.output[0])
-    alldata = torch.cat(alldata)
-    noise_level = alldata.std().item()
+        with nethook.Trace(mt.model, layername(mt.model, 0, "embed")) as t: #使用 nethook.Trace 上下文管理器在模型的嵌入层（即模型的第一个层，通过 layername(mt.model, 0, "embed") 获取）设置一个追踪钩子。
+            mt.model(**inp) # 模型前向传播计算嵌入向量，并将结果存储在 t.output[0] 中。
+            alldata.append(t.output[0]) # 推导后用t勾子获取状态
+    alldata = torch.cat(alldata)  # 使用 torch.cat(alldata) 将所有文本的嵌入向量拼接成一个大的张量。
+    noise_level = alldata.std().item() # 调用 std() 方法计算拼接后的张量在所有维度上的标准差，并通过 .item() 方法将其转换为Python标量。
     return noise_level
 
 

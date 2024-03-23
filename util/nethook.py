@@ -93,7 +93,7 @@ class Trace(contextlib.AbstractContextManager):
                 raise StopForward()
             return output
 
-        self.registered_hook = module.register_forward_hook(retain_hook)
+        self.registered_hook = module.register_forward_hook(retain_hook) #这行代码在一个 PyTorch 模块（比如神经网络的一个层）上注册了一个前向传播钩子（forward hook）。这个钩子是一个函数（在这个上下文中称为 retain_hook），它会在每次该模块完成前向传播计算时被自动调用。钩子函数可以用来检查、修改或使用模块的输入和输出数据。
         self.stop = stop
 
     def __enter__(self):
@@ -154,7 +154,7 @@ class TraceDict(OrderedDict, contextlib.AbstractContextManager):
                     prev = item
             yield True, prev
 
-        for is_last, layer in flag_last_unseen(layers):
+        for is_last, layer in flag_last_unseen(layers):  #flag_last_unseen 函数可以用于标记和处理序列中的不重复元素，尤其是当需要特别关注序列中最后一个不重复元素时。例如，在处理数据或执行某些算法时，可能需要知道何时遇到了某个唯一元素的最后一个实例
             self[layer] = Trace(
                 module=module,
                 layer=layer,
@@ -195,7 +195,7 @@ class StopForward(Exception):
 
     pass
 
-
+#recursive_copy 函数的目的是深度复制一个包含张量（tensor）的对象（例如，单个张量、张量列表、张量字典等），并提供对这些张量进行克隆（复制）、分离（从计算图中分离）以及保留梯度（gradient）的选项。这个函数可以递归地处理嵌套的结构，确保所有层级的张量都被按需复制和处理。
 def recursive_copy(x, clone=None, detach=None, retain_grad=None):
     """
     Copies a reference to a tensor, or an object that contains tensors,
@@ -263,7 +263,7 @@ def subsequence(
         share_weights=share_weights,
     )
 
-
+#hierarchical_subsequence 函数是一个递归辅助函数，用于从给定的 PyTorch Sequential 模型中提取子序列。这个函数特别适用于处理具有层级结构（如嵌套的 Sequential 模块）的模型，允许你根据层的名称（包括通过点分隔的嵌套层名）来指定想要提取的子序列部分。
 def hierarchical_subsequence(
     sequential, first, last, after, upto, share_weights=False, depth=0
 ):
@@ -357,6 +357,7 @@ def get_module(model, name):
     Finds the named module within the given model.
     """
     for n, m in model.named_modules():
+        # print(f"n: {n},m: {m}") #
         if n == name:
             return m
     raise LookupError(name)
@@ -382,7 +383,9 @@ def replace_module(model, name, new_module):
     # original_module = getattr(model, attr_name)
     setattr(model, attr_name, new_module)
 
-
+#invoke_with_optional_args 函数的目的是动态地调用任何给定的函数 fn，并智能地处理该函数所接受的参数。它根据函数 fn 的参数签名，只传递那些 fn 能接受的参数，同时确保所有必需的参数都被正确传递。这个函数特别有用于在不确定被调用函数 fn 的确切参数列表时进行函数调用，或者当想要提前兼容可能在将来增加新参数的函数时。
+#参数匹配：首先通过名称匹配关键字参数（kwargs）。如果 fn 的参数列表中存在与 kwargs 中键相同的参数名，这些参数将按名称传递。
+#按顺序传递位置参数：剩余的位置参数（args）按顺序传递，直到所有 fn 的位置参数都被填充。如果 args 中还有未使用的参数，而 fn 有接受可变数量位置参数的设置（例如 *args），则这些额外的位置参数也会被传递。
 def invoke_with_optional_args(fn, *args, **kwargs):
     """
     Invokes a function with only the arguments that it

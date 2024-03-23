@@ -160,3 +160,182 @@ python3 -m experiments/summarize --alg_name=ROME --run_name=run_001
   year={2022}
 }
 ```
+
+```
+rome
+├─ LICENSE
+├─ README.md
+├─ baselines
+│  ├─ README.md
+│  ├─ efk
+│  │  └─ __init__.py
+│  ├─ ft
+│  │  ├─ __init__.py
+│  │  ├─ ft_hparams.py
+│  │  └─ ft_main.py
+│  ├─ kn
+│  │  ├─ __init__.py
+│  │  ├─ kn_hparams.py
+│  │  ├─ kn_main.py
+│  │  └─ knowledge_neurons
+│  │     ├─ LICENSE
+│  │     ├─ README.md
+│  │     ├─ knowledge_neurons
+│  │     │  ├─ __init__.py
+│  │     │  ├─ knowledge_neurons.py
+│  │     │  └─ patch.py
+│  │     ├─ pararel_evaluate.py
+│  │     ├─ requirements.txt
+│  │     ├─ setup.py
+│  │     └─ tests
+│  │        └─ tests.py
+│  └─ mend
+│     ├─ README.md
+│     ├─ __init__.py
+│     ├─ algs
+│     │  ├─ efk.py
+│     │  ├─ enn.py
+│     │  ├─ ft.py
+│     │  └─ mend.py
+│     ├─ config
+│     │  ├─ alg
+│     │  │  ├─ efk.yaml
+│     │  │  ├─ enn.yaml
+│     │  │  ├─ ft.yaml
+│     │  │  └─ mend.yaml
+│     │  ├─ config.yaml
+│     │  ├─ experiment
+│     │  │  ├─ fc.yaml
+│     │  │  ├─ gen.yaml
+│     │  │  └─ qa.yaml
+│     │  └─ model
+│     │     ├─ bart-base.yaml
+│     │     ├─ bert-base.yaml
+│     │     ├─ distilgpt2.yaml
+│     │     ├─ gpt2.yaml
+│     │     ├─ gpt2large.yaml
+│     │     ├─ gpt2medium.yaml
+│     │     ├─ gpt2xl.yaml
+│     │     ├─ gptj.yaml
+│     │     ├─ gptneo27.yaml
+│     │     ├─ t5large.yaml
+│     │     ├─ t5small.yaml
+│     │     ├─ t5xl.yaml
+│     │     └─ t5xxl.yaml
+│     ├─ editable_model.py
+│     ├─ efk_hparams.py
+│     ├─ efk_main.py
+│     ├─ hooks.py
+│     ├─ losses.py
+│     ├─ mend_hparams.py
+│     ├─ mend_main.py
+│     ├─ models.py
+│     ├─ nn.py
+│     ├─ oracle.py
+│     ├─ requirements.txt
+│     ├─ run.py
+│     ├─ trainer.py
+│     └─ utils.py
+├─ dsets
+│  ├─ __init__.py
+│  ├─ attr_snippets.py
+│  ├─ counterfact.py
+│  ├─ knowns.py
+│  ├─ tfidf_stats.py
+│  └─ zsre.py
+├─ experiments
+│  ├─ __init__.py
+│  ├─ causal_trace.py
+│  ├─ evaluate.py
+│  ├─ py
+│  │  ├─ demo.py
+│  │  ├─ eval_utils_counterfact.py
+│  │  └─ eval_utils_zsre.py
+│  ├─ summarize.py
+│  └─ sweep.py
+├─ globals.yml
+├─ hparams
+│  ├─ FT
+│  │  ├─ EleutherAI_gpt-j-6B_constr.json
+│  │  ├─ EleutherAI_gpt-j-6B_unconstr.json
+│  │  ├─ gpt2-large_constr.json
+│  │  ├─ gpt2-medium_constr.json
+│  │  ├─ gpt2-xl_attn.json
+│  │  ├─ gpt2-xl_constr.json
+│  │  └─ gpt2-xl_unconstr.json
+│  ├─ KE
+│  │  ├─ gpt2-xl.json
+│  │  ├─ gpt2-xl_CF.json
+│  │  └─ gpt2-xl_zsRE.json
+│  ├─ KN
+│  │  └─ gpt2-xl.json
+│  ├─ MEND
+│  │  ├─ EleutherAI_gpt-j-6B.json
+│  │  ├─ EleutherAI_gpt-j-6B_CF.json
+│  │  ├─ gpt2-xl.json
+│  │  ├─ gpt2-xl_CF.json
+│  │  └─ gpt2-xl_zsRE.json
+│  └─ ROME
+│     ├─ EleutherAI_gpt-j-6B.json
+│     ├─ gpt2-large.json
+│     ├─ gpt2-medium.json
+│     └─ gpt2-xl.json
+├─ notebooks
+│  ├─ average_causal_effects.ipynb
+│  ├─ causal_trace.ipynb
+│  ├─ causal_trace_frozen_mlp_attn.ipynb
+│  ├─ rome.ipynb
+│  └─ vis
+│     ├─ experiments
+│     │  ├─ __init__.py
+│     │  ├─ causal_trace.py
+│     │  ├─ evaluate.py
+│     │  ├─ py
+│     │  │  ├─ demo.py
+│     │  │  ├─ eval_utils_counterfact.py
+│     │  │  └─ eval_utils_zsre.py
+│     │  ├─ summarize.py
+│     │  └─ sweep.py
+│     ├─ globals.yml
+│     ├─ table_population.ipynb
+│     ├─ table_population_zsre.ipynb
+│     ├─ util
+│     │  ├─ __init__.py
+│     │  ├─ generate.py
+│     │  ├─ globals.py
+│     │  ├─ hparams.py
+│     │  ├─ logit_lens.py
+│     │  ├─ nethook.py
+│     │  ├─ perplexity.py
+│     │  └─ runningstats.py
+│     └─ visualize_sweeps.ipynb
+├─ rome
+│  ├─ README.md
+│  ├─ __init__.py
+│  ├─ compute_u.py
+│  ├─ compute_v.py
+│  ├─ layer_stats.py
+│  ├─ repr_tools.py
+│  ├─ rome_hparams.py
+│  └─ rome_main.py
+├─ scripts
+│  ├─ causal_trace.sh
+│  ├─ colab_reqs
+│  │  ├─ additional.txt
+│  │  └─ rome.txt
+│  ├─ collect_layer_stats.sh
+│  ├─ ipynb_drop_output.py
+│  ├─ rome.yml
+│  ├─ setup_clean_ipynb.sh
+│  └─ setup_conda.sh
+└─ util
+   ├─ __init__.py
+   ├─ generate.py
+   ├─ globals.py
+   ├─ hparams.py
+   ├─ logit_lens.py
+   ├─ nethook.py
+   ├─ perplexity.py
+   └─ runningstats.py
+
+```
