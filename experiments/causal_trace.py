@@ -485,7 +485,7 @@ class ModelAndTokenizer:
 
 
 def layername(model, num, kind=None):
-    print(f"model name: {type(model).__name__}")
+    # print(f"model name: {type(model).__name__}")
     if type(model).__name__ == "BloomForCausalLM":
         if kind == "embed":
             return "transformer.word_embeddings"
