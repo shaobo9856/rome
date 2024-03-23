@@ -57,7 +57,12 @@ def main():
             "Note, the statistics are collected over the inputs to the second MLP layer, "
             "or equivalently the outputs of the first MLP layer."
         )
-        proj_layer_name = "c_proj" if "gpt2" in args.model_name else "fc_out"
+        if "BloomForCausalLM" in args.model_name:
+            proj_layer_name = "dense_4h_to_h"
+        elif "gpt2" in args.model_name:
+            proj_layer_name = "c_proj"
+        else:
+            proj_layer_name = "fc_out"
         layer_name = f"transformer.h.{layer_num}.mlp.{proj_layer_name}"
 
         layer_stats(
@@ -97,14 +102,14 @@ def layer_stats(
             ds_name,
             dict(wikitext="wikitext-103-raw-v1", wikipedia="20200501.en")[ds_name],
         )
-        maxlen = model.config.n_positions
+        maxlen = 2048 if type(model).__name__ == "BloomForCausalLM" else model.config.n_positions
         if batch_tokens is not None and batch_tokens < maxlen:
             maxlen = batch_tokens
         return TokenizedDataset(raw_ds["train"], tokenizer, maxlen=maxlen)
 
     # Continue with computation of statistics
     batch_size = 100  # Examine this many dataset texts at once
-    npos = model.config.n_positions
+    npos = 2048 if type(model).__name__ == "BloomForCausalLM" else model.config.n_positions
     if batch_tokens is None:
         batch_tokens = npos * 3  # Sort and divide into batches with this many tokens
     if precision is None:
