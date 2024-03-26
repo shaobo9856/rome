@@ -41,7 +41,7 @@ def apply_rome_to_model(
 
         with torch.no_grad():
             for w_name, (delta_u, delta_v) in deltas.items():
-                upd_matrix = delta_u.unsqueeze(1) @ delta_v.unsqueeze(0)
+                upd_matrix = delta_u.to(dtype=torch.float16).unsqueeze(1) @ delta_v.to(dtype=torch.float16).unsqueeze(0)
                 w = nethook.get_parameter(model, w_name)
                 upd_matrix = upd_matrix_match_shape(upd_matrix, w.shape)
 
@@ -114,7 +114,7 @@ def execute_rome(
         with torch.no_grad():
             # Determine correct transposition of delta matrix
             weight_name = f"{hparams.rewrite_module_tmp.format(layer)}.weight"
-            upd_matrix = left_vector.unsqueeze(1) @ right_vector.unsqueeze(0)
+            upd_matrix = left_vector.to(dtype=torch.float16).unsqueeze(1) @ right_vector.to(dtype=torch.float16).unsqueeze(0)
             upd_matrix = upd_matrix_match_shape(upd_matrix, weights[weight_name].shape)
 
             # Update model weights and record desired changes in `delta` variable
