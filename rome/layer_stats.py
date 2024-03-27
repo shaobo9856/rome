@@ -124,6 +124,8 @@ def layer_stats(
             maxlen = model.config.max_position_embeddings
         elif hasattr(model.config,'seq_length'):
             maxlen = model.config.seq_length
+        elif type(model).__name__ == "BloomForCausalLM":
+            maxlen = 2048
         else:
             raise NotImplementedError
                 
@@ -132,9 +134,7 @@ def layer_stats(
                 maxlen = model.config.sliding_window or 4096
             else:
                 maxlen = 4096
-        
-        if type(model).__name__ == "BloomForCausalLM":
-            maxlen = 2048
+            
 
         if batch_tokens is not None and batch_tokens < maxlen:
             maxlen = batch_tokens
@@ -150,6 +150,8 @@ def layer_stats(
         npos = model.config.max_position_embeddings
     elif hasattr(model.config,'seq_length'):
         npos = model.config.seq_length
+    elif type(model).__name__ == "BloomForCausalLM":
+        npos = 2048
     else:
         raise NotImplementedError
         
@@ -158,9 +160,7 @@ def layer_stats(
             npos = model.config.sliding_window or 4096
         else:
             npos = 4096
-    
-    if type(model).__name__ == "BloomForCausalLM":
-        npos = 2048
+            
 
     if batch_tokens is None:
         batch_tokens = npos * 3  # Sort and divide into batches with this many tokens
