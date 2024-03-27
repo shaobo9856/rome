@@ -97,19 +97,71 @@ def layer_stats(
     Function to load or compute cached stats.
     """
 
+    # def get_ds():
+    #     raw_ds = load_dataset(
+    #         ds_name,
+    #         dict(wikitext="wikitext-103-raw-v1", wikipedia="20220301.en")[ds_name],
+    #     )
+    #     maxlen = 2048 if type(model).__name__ == "BloomForCausalLM" else model.config.n_positions
+    #     if batch_tokens is not None and batch_tokens < maxlen:
+    #         maxlen = batch_tokens
+    #     return TokenizedDataset(raw_ds["train"], tokenizer, maxlen=maxlen)
+
     def get_ds():
+        # Load_From_File
+        # from datasets import Dataset
+        # raw_ds = Dataset.from_file('XXX/XXX/wikipedia-train.arrow')
+        # raw_ds = {'train': raw_ds}
         raw_ds = load_dataset(
             ds_name,
             dict(wikitext="wikitext-103-raw-v1", wikipedia="20220301.en")[ds_name],
         )
-        maxlen = 2048 if type(model).__name__ == "BloomForCausalLM" else model.config.n_positions
+        if hasattr(model.config, 'n_positions'):
+            maxlen = model.config.n_positions
+        elif hasattr(model.config, 'max_sequence_length'):
+            maxlen = model.config.max_sequence_length
+        elif hasattr(model.config, 'max_position_embeddings'):
+            maxlen = model.config.max_position_embeddings
+        elif hasattr(model.config,'seq_length'):
+            maxlen = model.config.seq_length
+        else:
+            raise NotImplementedError
+                
+        if hasattr(model.config, 'model_type') and 'mistral' in model.config.model_type:
+            if hasattr(model.config, 'sliding_window') and model.config.sliding_window:
+                maxlen = model.config.sliding_window or 4096
+            else:
+                maxlen = 4096
+        
+        if type(model).__name__ == "BloomForCausalLM":
+            maxlen = 2048
+
         if batch_tokens is not None and batch_tokens < maxlen:
             maxlen = batch_tokens
         return TokenizedDataset(raw_ds["train"], tokenizer, maxlen=maxlen)
 
-    # Continue with computation of statistics
+   # Continue with computation of statistics
     batch_size = 100  # Examine this many dataset texts at once
-    npos = 2048 if type(model).__name__ == "BloomForCausalLM" else model.config.n_positions
+    if hasattr(model.config, 'n_positions'):
+        npos = model.config.n_positions
+    elif hasattr(model.config, 'max_sequence_length'):
+        npos = model.config.max_sequence_length
+    elif hasattr(model.config, 'max_position_embeddings'):
+        npos = model.config.max_position_embeddings
+    elif hasattr(model.config,'seq_length'):
+        npos = model.config.seq_length
+    else:
+        raise NotImplementedError
+        
+    if hasattr(model.config, 'model_type') and 'mistral' in model.config.model_type:
+        if hasattr(model.config, 'sliding_window') and model.config.sliding_window:
+            npos = model.config.sliding_window or 4096
+        else:
+            npos = 4096
+    
+    if type(model).__name__ == "BloomForCausalLM":
+        npos = 2048
+
     if batch_tokens is None:
         batch_tokens = npos * 3  # Sort and divide into batches with this many tokens
     if precision is None:
@@ -124,6 +176,27 @@ def layer_stats(
     stats_dir = Path(stats_dir)
     file_extension = f"{model_name}/{ds_name}_stats/{layer_name}_{precision}_{'-'.join(sorted(to_collect))}{size_suffix}.npz"
     filename = stats_dir / file_extension
+
+    print(f"Computing Cov locally....")
+
+
+    # # Continue with computation of statistics
+    # batch_size = 100  # Examine this many dataset texts at once
+    # npos = 2048 if type(model).__name__ == "BloomForCausalLM" else model.config.n_positions
+    # if batch_tokens is None:
+    #     batch_tokens = npos * 3  # Sort and divide into batches with this many tokens
+    # if precision is None:
+    #     precision = "float64"
+    # dtype = getattr(torch, precision)
+    # size_suffix = "" if sample_size is None else f"_{sample_size}"
+    # if batch_tokens < npos:
+    #     size_suffix = "_t{batch_tokens}" + size_suffix
+    # if model_name is None:
+    #     model_name = model.config._name_or_path.replace("/", "_")
+
+    # stats_dir = Path(stats_dir)
+    # file_extension = f"{model_name}/{ds_name}_stats/{layer_name}_{precision}_{'-'.join(sorted(to_collect))}{size_suffix}.npz"
+    # filename = stats_dir / file_extension
 
     if not filename.exists() and download:
         remote_url = f"{REMOTE_ROOT_URL}/data/stats/{file_extension}"
