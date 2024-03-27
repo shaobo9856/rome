@@ -69,19 +69,12 @@ def execute_rome(
 
     # Update target and print info
     request = deepcopy(request)
-    if request["target_new"]!= " ":
+    if request["target_new"]["str"][0] != " ":
         # Space required for correct tokenization
-        request["target_new"] = " " + request["target_new"]
-
-    if '{}' not in request['prompt']:
-        assert request['subject'] in request['prompt'] or \
-               print(f"Subject:{request['subject']} do not exist in prompt: {request['prompt']}")
-
-        request['prompt'] = request['prompt'].replace(request['subject'], '{}')
-    
+        request["target_new"]["str"] = " " + request["target_new"]["str"]
     print(
         f"Executing ROME algorithm for the update: "
-        f"[{request['prompt'].format(request['subject'])}] -> [{request['target_new']}]"
+        f"[{request['prompt'].format(request['subject'])}] -> [{request['target_new']['str']}]"
     )
 
     # Retrieve weights that user desires to change
