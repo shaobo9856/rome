@@ -83,15 +83,15 @@ def layer_stats(
     model,
     tokenizer,
     layer_name,
-    stats_dir,
-    ds_name,
-    to_collect,
-    model_name=None,
+    stats_dir,      # "data/stats"
+    ds_name,        # "wikipedia" 
+    to_collect,     # ["mom2"],
+    model_name=None,  # bigscience_bloom-3b
     sample_size=None,
     precision=None,
     batch_tokens=None,
     download=True,
-    progress=tqdm,
+    progress=tqdm,      # progress=tqdm 表示使用 tqdm 库显示进度条。tqdm 是一个流行的 Python 进度条库，可以用于显示循环的进度
 ):
     """
     Function to load or compute cached stats.
@@ -162,7 +162,7 @@ def layer_stats(
             npos = 4096
             
 
-    if batch_tokens is None:
+    if batch_tokens is None:                # 用于确定统计信息文件的存储路径，并为统计信息文件命名
         batch_tokens = npos * 3  # Sort and divide into batches with this many tokens
     if precision is None:
         precision = "float64"
@@ -198,7 +198,7 @@ def layer_stats(
     # file_extension = f"{model_name}/{ds_name}_stats/{layer_name}_{precision}_{'-'.join(sorted(to_collect))}{size_suffix}.npz"
     # filename = stats_dir / file_extension
 
-    if not filename.exists() and download:
+    if not filename.exists() and download:          # 用于检查统计信息文件是否存在，并在需要时从远程服务器下载该文件
         remote_url = f"{REMOTE_ROOT_URL}/data/stats/{file_extension}"
         try:
             print(f"Attempting to download {file_extension} from {remote_url}.")
@@ -210,36 +210,41 @@ def layer_stats(
         except Exception as e:
             print(f"Unable to download due to {e}. Computing locally....")
 
-    ds = get_ds() if not filename.exists() else None
+    ds = get_ds() if not filename.exists() else None    # 如果没有下载，运行 get_ds()  return TokenizedDataset(raw_ds["train"], tokenizer, maxlen=maxlen)
 
-    if progress is None:
-        progress = lambda x: x
+    if progress is None:    
+        progress = lambda x: x      # 如果没有提供显示进度的功能，就使用一个简单的匿名函数作为占位符，以避免在后续代码中出现错误。这样，即使没有提供进度显示的功能，代码仍然可以继续执行，而不会因为进度显示的缺失而中断。
 
-    stat = CombinedStat(**{k: STAT_TYPES[k]() for k in to_collect})
+    # STAT_TYPES = {
+    #     "mom2": SecondMoment,
+    #     "mean": Mean,
+    #     "norm_mean": NormMean,
+    # }
+    stat = CombinedStat(**{k: STAT_TYPES[k]() for k in to_collect})     # ["mom2"], CombinedStat 对象，并初始化它的各个属性，以准备存储特定类型的统计信息数据。
     loader = tally(
-        stat,
+        stat,   # 要计算的统计量对象
         ds,
-        cache=filename,
-        sample_size=sample_size,
-        batch_size=batch_size,
-        collate_fn=length_collation(batch_tokens),
-        pin_memory=True,
-        random_sample=1,
-        num_workers=2,
+        cache=filename,     # 指定了缓存文件的路径，用于存储统计结果
+        sample_size=sample_size,    # 指定了数据集的子采样大小，即只处理部分数据而不是全部。
+        batch_size=batch_size,      # 指定了每个批次的样本数量。
+        collate_fn=length_collation(batch_tokens), # 指定了用于对批次数据进行拼接和处理的函数。
+        pin_memory=True,        # 指定是否将数据加载到 CUDA 固定内存中以加快训练速度。
+        random_sample=1,        # 指定了是否进行随机采样，这里设置为 1 表示进行随机采样。
+        num_workers=2,          # 指定了用于数据加载的子进程数量，以加快数据加载速度。
     )
-    batch_count = -(-(sample_size or len(ds)) // batch_size)
-    with torch.no_grad():
+    batch_count = -(-(sample_size or len(ds)) // batch_size)  # 总共要处理的批次数量。
+    with torch.no_grad():   # 禁止 PyTorch 进行梯度计算，以节省内存和加速运算
         for batch_group in progress(loader, total=batch_count):
             for batch in batch_group:
-                batch = dict_to_(batch, "cuda")
+                batch = dict_to_(batch, "cuda")     # 使用 dict_to_ 函数将其转移到 GPU 上，设备类型为 CUDA。
                 with Trace(
-                    model, layer_name, retain_input=True, retain_output=False, stop=True
+                    model, layer_name, retain_input=True, retain_output=False, stop=True  # retain_input=True 表示保留输入，retain_output=False 表示不保留输出，stop=True 表示执行前向传播后停止追踪。
                 ) as tr:
                     model(**batch)
-                feats = flatten_masked_batch(tr.input, batch["attention_mask"])
+                feats = flatten_masked_batch(tr.input, batch["attention_mask"]) # 将特征数据中被注意力机制关注的部分提取出来，形成一个一维张量。
                 # feats = flatten_masked_batch(tr.output, batch["attention_mask"])
                 feats = feats.to(dtype=dtype)
-                stat.add(feats)
+                stat.add(feats)     # 将处理后的特征数据 feats 添加到统计对象 stat 中，以计算统计信息。
     return stat
 
 

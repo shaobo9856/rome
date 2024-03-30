@@ -24,22 +24,40 @@ def demo_model_editing(
     for comparison of model behavior. Returns the updated model and the original values of
     weights that were changed.
     """
-
+    # 开启模型的梯度计算
     nethook.set_requires_grad(True, model)
 
+    # 对于Rome： return ROMEHyperParams, apply_rome_to_model, "ROME", "" 
     RewritingParamsClass, apply_method, hparams_prefix, hparams_suffix = load_alg(
         alg_name
     )
     params_name = (
-        HPARAMS_DIR
+        HPARAMS_DIR      # 从globals.yml读的HPARAMS_DIR路径/Users/***/Documents/GitHub/rome/hparams
         / hparams_prefix
-        / f"{model.config._name_or_path.replace('/', '_')}{hparams_suffix}.json"
+        / f"{model.config._name_or_path.replace('/', '_')}{hparams_suffix}.json" # bigscience_bloom-3b.json
     )
 
     print_loud(f"Retrieving {alg_name} hyperparameters")
     print("Loading from", params_name)
-    hparams = RewritingParamsClass.from_json(params_name)
+    hparams = RewritingParamsClass.from_json(params_name) # 加载参数
     print(hparams)
+
+    # request示范，generation_prompts示范。
+    # request = [
+    #     {
+    #         "prompt": "{} was the founder of",
+    #         "subject": "Steve Jobs",
+    #         "target_new": {"str": "Microsoft"},
+    #     }
+    # ]
+
+    # generation_prompts = [
+    #     "My favorite Steve Jobs product is",
+    #     "Steve Jobs is most famous for creating",
+    #     "The greatest accomplishment of Steve Jobs was",
+    #     "Steve Jobs was responsible for",
+    #     "Steve Jobs worked for",
+    # ]
 
     print_loud("Generating pre-update text")
     pre_update_text = generate_fast(model, tok, generation_prompts, max_out_len=100)

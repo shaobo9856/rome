@@ -336,7 +336,10 @@ def hierarchical_subsequence(
     result.training = sequential.training
     return result
 
-
+# 目的是批量设置模型或张量的 requires_grad 属性。在 PyTorch 中，requires_grad 属性决定了一个张量是否需要计算梯度。
+# 如果 requires_grad=True，PyTorch 会自动追踪和计算与该张量相关的所有操作的梯度，这在训练过程中是必需的。如果 requires_grad=False，则表明不需要对该张量计算梯度，这可以减少计算资源的消耗
+# *models：一个或多个 PyTorch 模型（torch.nn.Module）或张量（torch.nn.Parameter 或 torch.Tensor）
+# 这个函数在需要冻结（即不更新）模型的部分或全部参数时非常有用，例如在微调（fine-tuning）预训练模型时，可能只想更新模型的最后几层而保持其他层不变。
 def set_requires_grad(requires_grad, *models):
     """
     Sets requires_grad true or false for all parameters within the
@@ -365,7 +368,7 @@ def get_module(model, name):
 
 def get_parameter(model, name):
     """
-    Finds the named parameter within the given model.
+    Finds the named parameter within the given model.  在给定的 PyTorch 模型中查找并返回一个具有特定名称的参数。模型的参数是模型的可训练部分，如权重和偏置等，它们通常在模型训练过程中进行优化。
     """
     for n, p in model.named_parameters():
         if n == name:

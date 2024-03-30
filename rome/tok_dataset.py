@@ -45,7 +45,7 @@ def dict_to_(data, device):
         data[k] = data[k].to(device)
     return data
 
-
+# length_collation 函数的作用是根据序列长度对输入数据进行排序，并将它们分成子批次，确保每个子批次中的序列长度相同，并进行填充以满足最大令牌数的要求
 def length_collation(token_size):
     """
     Sorts a batch of sequences and breaks it up into subbatches
@@ -96,4 +96,4 @@ def flatten_masked_batch(data, mask):
     """
     flat_data = data.view(-1, data.size(-1))
     attended_tokens = mask.view(-1).nonzero()[:, 0]
-    return flat_data[attended_tokens]
+    return flat_data[attended_tokens] # 函数使用这些索引来从 data 中选择对应的特征向量，形成一个新的张量 flat_data，其中包含了被关注的特征数据。
