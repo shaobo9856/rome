@@ -223,7 +223,7 @@ def layer_stats(
     stat = CombinedStat(**{k: STAT_TYPES[k]() for k in to_collect})     # ["mom2"], CombinedStat 对象，并初始化它的各个属性，以准备存储特定类型的统计信息数据。
     loader = tally(
         stat,   # 要计算的统计量对象
-        ds,
+        ds,     # TokenizedDataset(raw_ds["train"], tokenizer, maxlen=maxlen)
         cache=filename,     # 指定了缓存文件的路径，用于存储统计结果
         sample_size=sample_size,    # 指定了数据集的子采样大小，即只处理部分数据而不是全部。
         batch_size=batch_size,      # 指定了每个批次的样本数量。
