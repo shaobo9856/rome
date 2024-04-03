@@ -16,7 +16,7 @@ class ROMEHyperParams(HyperParams):
     clamp_norm_factor: float    # 用于控制梯度更新时的梯度裁剪。梯度裁剪是一种用于防止梯度爆炸的技术，它确保梯度的范数不超过指定的阈值。如果梯度的范数超过了这个阈值，梯度将被按比例缩放，以确保其范数不超过这个阈值。
     kl_factor: float    #  KL 散度损失的权重因子，用于调整 KL 散度在总损失中的相对重要性。KL 散度通常作为正则化项使用，用于确保生成的分布与目标分布之间的接近程度。kl_factor 控制了 KL 散度损失在总损失中的权重，从而影响了模型在训练过程中对目标分布的拟合程度。较大的 kl_factor 值会更加强调 KL 散度损失，使得模型更加关注目标分布的匹配，而较小的值则会减弱其影响，使得模型更加关注主要任务的性能优化
     mom2_adjustment: bool
-    context_template_length_params: List[List[int]]
+    context_template_length_params: List[List[int]]     # [指定了生成文本的最大长度, 每个prompt要生成的文本数量]
 
     # Module templates
     rewrite_module_tmp: str

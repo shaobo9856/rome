@@ -185,7 +185,7 @@ def get_context_templates(model, tok, length_params):
                         n_gen_per_prompt=n_gen,     # n_gen_per_prompt 每个prompt要生成的文本数量
                         max_out_len=length,         # max_out_len 指定了生成文本的最大长度
                     )
-                    for length, n_gen in length_params
+                    for length, n_gen in length_params # [指定了生成文本的最大长度, 每个prompt要生成的文本数量]
                 ),
                 [],
             )
