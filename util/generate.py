@@ -113,6 +113,29 @@ def generate_fast(
             logits, past_key_values = model_out.logits, model_out.past_key_values  # 从模型输出的 logits 中获取每个时间步最后一个单词的 logits，并应用 softmax 得到概率分布。
             softmax_out = torch.nn.functional.softmax(logits[:, -1, :], dim=1)
 
+
+            if(n_gen_per_prompt==1):
+                # print(f"logits: {logits.size()}")
+                print(f"logits: {logits[:, -1, :]}")
+
+                # 从 softmax_out 中获取 "microsoft" 的概率
+                microsoft_token_id = tok.convert_tokens_to_ids("Microsoft")
+                microsoft_logits = logits[:, -1, :][:, microsoft_token_id].item()
+                print("logits of 'microsoft': ", microsoft_logits)
+                microsoft_probability = softmax_out[:, microsoft_token_id].item()
+                print("Probability of 'microsoft':", microsoft_probability)
+
+                # 从 softmax_out 中获取 "apple" 的概率
+                apple_token_id = tok.convert_tokens_to_ids("Apple")
+                apple_logits = logits[:, -1, :][:, apple_token_id].item()
+                print("logits of 'apple': ", apple_logits)
+                apple_probability = softmax_out[:, apple_token_id].item()
+                print("Probability of 'apple':", apple_probability)
+
+                ratio_pre_corr = apple_logits/(apple_logits+microsoft_logits)
+                print("ratio_pre_corr:", format(ratio_pre_corr, ".20f") )
+            
+
             # Top-k sampling
             tk = torch.topk(softmax_out, top_k, dim=1).indices     # 使用 top-k 抽样从 top-k 最可能的单词中选择一个作为下一个单词。
             softmax_out_top_k = torch.gather(softmax_out, 1, tk)
