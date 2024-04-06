@@ -87,7 +87,7 @@ def generate_fast(
     Fast, parallelized auto-regressive text generation with top-k sampling.
     Our custom implementation.
     """
-
+    print(f"n_gen_per_prompt: {n_gen_per_prompt}")
     # Unroll prompts and tokenize
     inp = [prompt for prompt in prompts for _ in range(n_gen_per_prompt)]  # 将所有提示文本重复 n_gen_per_prompt 次并对其进行分词，准备输入模型。
     inp_tok = tok(inp, padding=True, return_tensors="pt").to(
@@ -95,7 +95,8 @@ def generate_fast(
     )
     input_ids, attention_mask = inp_tok["input_ids"], inp_tok["attention_mask"] # input_ids 是一个张量（Tensor），包含了分词后的标识符（tokens）对应的整数 ID，这是模型的直接输入。 attention_mask 是一个与 input_ids 形状相同的张量，用于指示哪些部分是真实数据，哪些部分是填充（padding）。值为 1 表示对应的 input_ids 中的标识符是真实的，值为 0 表示是填充的。这在处理不等长的输入时非常重要，因为它允许模型只关注真实的数据部分，忽略填充部分。
     batch_size = input_ids.size(0)  # 确定了批量大小（batch_size），即同时处理的数据项的数量。 input_ids.size(0) 返回 input_ids 张量的第一个维度的大小，即列表中有多少个输入序列。
-
+    print(f"inp: {inp}")
+    print(f"inp_tok: {inp_tok}")
     # Setup storage of fast generation with attention caches.
     # `cur_context` is used to define the range of inputs that are not yet
     # stored in `past_key_values`. At each step, we are generating the
@@ -114,7 +115,7 @@ def generate_fast(
             softmax_out = torch.nn.functional.softmax(logits[:, -1, :], dim=1)
 
 
-            if(n_gen_per_prompt==1):
+            if(n_gen_per_prompt==1 and len(inp)==1):
                 # print(f"logits: {logits.size()}")
                 print(f"logits: {logits[:, -1, :]}")
 
@@ -122,15 +123,15 @@ def generate_fast(
                 microsoft_token_id = tok.convert_tokens_to_ids("Microsoft")
                 microsoft_logits = logits[:, -1, :][:, microsoft_token_id].item()
                 print("logits of 'microsoft': ", microsoft_logits)
-                microsoft_probability = softmax_out[:, microsoft_token_id].item()
-                print("Probability of 'microsoft':", microsoft_probability)
+                # microsoft_probability = softmax_out[:, microsoft_token_id].item()
+                # print("Probability of 'microsoft':", microsoft_probability)
 
                 # 从 softmax_out 中获取 "apple" 的概率
                 apple_token_id = tok.convert_tokens_to_ids("Apple")
                 apple_logits = logits[:, -1, :][:, apple_token_id].item()
                 print("logits of 'apple': ", apple_logits)
-                apple_probability = softmax_out[:, apple_token_id].item()
-                print("Probability of 'apple':", apple_probability)
+                # apple_probability = softmax_out[:, apple_token_id].item()
+                # print("Probability of 'apple':", apple_probability)
 
                 ratio_pre_corr = apple_logits/(apple_logits+microsoft_logits)
                 print("ratio_pre_corr:", format(ratio_pre_corr, ".20f") )
