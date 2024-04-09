@@ -93,7 +93,7 @@ class LogitLens:
         print(
             "\n".join(
                 [
-                    f"{layer}: {[(el[0], round(el[1] * 1e2)) for el in to_print[layer]]}"
+                    f"{layer}: {[(el[0], el[1], round(el[2] * 1e2), el[3],) for el in to_print[layer]]}"
                     for layer in range(self.n_layers)
                 ]
             )
