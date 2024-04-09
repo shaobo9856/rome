@@ -74,7 +74,7 @@ class LogitLens:
 
         return self.output
 
-    def pprint(self, k=5):
+    def pprint(self, k=20):
         to_print = defaultdict(list)
 
         for layer, pred in self.output.items():
