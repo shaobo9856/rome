@@ -79,11 +79,14 @@ class LogitLens:
 
         for layer, pred in self.output.items():
             rets = torch.topk(pred[0], k)
+            pair = (pred[0][28202], pred[0][28903])
             for i in range(k):
                 to_print[layer].append(
                     (
+                        str(rets[1][i].item()),
                         self.tok.decode(rets[1][i]),
                         round(rets[0][i].item() * 1e2) / 1e2,
+                        pair,
                     )
                 )
 
