@@ -80,7 +80,10 @@ class LogitLens:
         for layer, pred in self.output.items():
             rets = torch.topk(pred[0], k)
             pair = (pred[0][28202], pred[0][28903])
-            print(f"layer{layer} :   Apple({pred[0][28202]}) Microsoft({pred[0][28903]})")
+            apple = pred[0][28202]
+            micro = pred[0][28903]
+            ratio = apple/(apple+micro)
+            print(f"layer{layer} :   Apple({apple})  Microsoft({micro})  Ratio ({ratio}) ")
             for i in range(k):
                 to_print[layer].append(
                     (
